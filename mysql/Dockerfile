@@ -13,5 +13,3 @@ RUN chmod a+x /etc/run.sh
 EXPOSE 3306
 
 CMD /etc/run.sh
-
-#CMD ["/bin/bash", "/opt/startup.sh"]
