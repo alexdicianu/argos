@@ -8,5 +8,5 @@
 docker build -t="dicix/mysql" .</code>
 
 <strong>Run:</strong><br />
-<code>docker run -d -t -p 80 --name nginx --link mysql:db -v /Users/dicix/work/www/proiecte:/var/www/html dicix/nginx<br />
-docker run -d -t -p 3306:3306 --name mysql --volumes-from mysql_data dicix/mysql</code>
+<code>docker run -d -t -p 80 --name nginx --link mysql:db -v /Users/dicix/work/www/proiecte:/var/www/html dicix/nginx</code><br />
+<code>docker run -d -t -p 3306:3306 --name mysql --volumes-from mysql_data dicix/mysql</code>
