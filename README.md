@@ -4,7 +4,7 @@
 <h5>Local environment</h5>
 
 <strong>Build:</strong><br />
-<code>docker build -t="dicix/nginx" .<br />
+<code>docker build -t="dicix/nginx" .</code><br />
 docker build -t="dicix/mysql" .</code>
 
 <strong>Run:</strong><br />
