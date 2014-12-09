@@ -1,5 +1,5 @@
-Connecting to a container and executing commands:
-docker exec -i -t nginx /bin/bash
+<h4>Connecting to a container and executing commands:</h4>
+<code>docker exec -i -t nginx /bin/bash</code>
 
 Local environment
 
