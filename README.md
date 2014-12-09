@@ -5,7 +5,7 @@
 
 <strong>Build:</strong><br />
 <code>docker build -t="dicix/nginx" .</code><br />
-docker build -t="dicix/mysql" .</code>
+<code>docker build -t="dicix/mysql" .</code>
 
 <strong>Run:</strong><br />
 <code>docker run -d -t -p 80 --name nginx --link mysql:db -v /Users/dicix/work/www/proiecte:/var/www/html dicix/nginx</code><br />
