@@ -10,3 +10,5 @@
 <strong>Run:</strong><br />
 <code>docker run -d -t -p 80 --name nginx --link mysql:db -v /Users/dicix/work/www/proiecte:/var/www/html dicix/nginx</code><br />
 <code>docker run -d -t -p 3306:3306 --name mysql --volumes-from mysql_data dicix/mysql</code>
+<code>docker run -d -t -p 80:80 --name varnish dicix/varnish</code>
+<code>docker run -d -p 6379:6379 --name redis dicix/redis</code>

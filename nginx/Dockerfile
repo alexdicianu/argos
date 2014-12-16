@@ -35,4 +35,4 @@ ADD bin/run.sh /etc/run.sh
 RUN chmod a+x /etc/run.sh
 CMD /etc/run.sh
 
-EXPOSE 80
+EXPOSE 8080
