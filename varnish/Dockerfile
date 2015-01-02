@@ -21,4 +21,4 @@ EXPOSE 80
 
 ADD bin/run.sh /etc/run.sh
 RUN chmod a+x /etc/run.sh
-CMD /etc/run.sh
+ENTRYPOINT /etc/run.sh

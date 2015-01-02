@@ -1,0 +1,25 @@
+nginx:
+  build: nginx
+  # Command "image" can be used if we wish to use the dicix/nginx docker repo. For local repo, we use build.
+  # image: dicix/nginx
+  ports:
+   - "8080:8080"
+  volumes:
+   - /Users/dicix/work/www/proiecte:/var/www/html
+
+mysql:
+  build: mysql
+  ports:
+   - "3306:3306"
+  volumes_from:
+   - mysql_data
+
+redis:
+  build: redis
+  ports:
+   - "6379:6379"
+
+varnish:
+  build: varnish
+  ports:
+   - "80:80"

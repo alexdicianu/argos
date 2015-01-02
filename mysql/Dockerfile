@@ -12,4 +12,4 @@ RUN chmod a+x /etc/run.sh
 
 EXPOSE 3306
 
-CMD /etc/run.sh
+ENTRYPOINT /etc/run.sh

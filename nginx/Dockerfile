@@ -33,6 +33,7 @@ ADD nginx/nginx.conf /etc/nginx/nginx.conf
 # run.sh
 ADD bin/run.sh /etc/run.sh
 RUN chmod a+x /etc/run.sh
-CMD /etc/run.sh
 
 EXPOSE 8080
+
+ENTRYPOINT /etc/run.sh
