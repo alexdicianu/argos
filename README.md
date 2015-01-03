@@ -45,3 +45,4 @@ Author two (author contact info)
 <code>docker run -d -t -p 3306:3306 --name mysql --volumes-from mysql_data dicix/mysql</code><br />
 <code>docker run -d -t -p 80:80 --name varnish dicix/varnish</code><br />
 <code>docker run -d -p 6379:6379 --name redis dicix/redis</code>
+
