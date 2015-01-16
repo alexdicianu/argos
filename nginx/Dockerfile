@@ -24,6 +24,9 @@ RUN echo "extension=redis.so" >> /etc/php5/cli/php.ini
 # Drush
 RUN pear channel-discover pear.drush.org && pear install drush/drush
 
+# PHP (creating log dir and adding Pantheon php.ini to the mix)
+ADD php/php.ini /etc/php5/fpm/php.ini
+
 # nginx
 RUN apt-get -y -q install nginx
 RUN mkdir -p /var/www/html
