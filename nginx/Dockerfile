@@ -4,14 +4,12 @@ RUN apt-get update --fix-missing
 
 RUN apt-get install -y vim curl wget git build-essential python-software-properties php5 php5-cgi php5-fpm php5-cli php5-mysql php5-curl php5-gd php5-mcrypt php5-intl php5-imap php5-tidy php-pear php5-dev strace
 
-RUN sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php5/fpm/php.ini
-RUN sed -i "s/;cgi.fix_pathinfo =*/cgi.fix_pathinfo = 0/" /etc/php5/fpm/php.ini
-RUN sed -i "s/;listen =*/listen = \/var\/run\/php5-fpm.sock/" /etc/php5/fpm/pool.d/www.conf
-RUN sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php5/cli/php.ini
-
-RUN sed -i "s/upload_max_filesize =.*/upload_max_filesize = 250M/" /etc/php5/fpm/php.ini
-RUN sed -i "s/post_max_size =.*/post_max_size = 250M/" /etc/php5/fpm/php.ini
-
+# RUN sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php5/fpm/php.ini
+# RUN sed -i "s/;cgi.fix_pathinfo =*/cgi.fix_pathinfo = 0/" /etc/php5/fpm/php.ini
+# RUN sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php5/cli/php.ini
+# RUN sed -i "s/upload_max_filesize =.*/upload_max_filesize = 250M/" /etc/php5/fpm/php.ini
+# RUN sed -i "s/post_max_size =.*/post_max_size = 250M/" /etc/php5/fpm/php.ini
+# RUN sed -i "s/;listen =*/listen = \/var\/run\/php5-fpm.sock/" /etc/php5/fpm/pool.d/www.conf
 
 # Install redis extension
 RUN apt-get install make
@@ -24,8 +22,9 @@ RUN echo "extension=redis.so" >> /etc/php5/cli/php.ini
 # Drush
 RUN pear channel-discover pear.drush.org && pear install drush/drush
 
-# PHP (creating log dir and adding Pantheon php.ini to the mix)
+# PHP (adding Pantheon php.ini and php-fpm.conf to the mix)
 ADD php/php.ini /etc/php5/fpm/php.ini
+ADD php/php-fpm.conf /etc/php5/fpm/pool.d/www.conf
 
 # nginx
 RUN apt-get -y -q install nginx
