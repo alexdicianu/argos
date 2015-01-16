@@ -5,7 +5,7 @@ nginx:
   ports:
    - "8080:8080"
   volumes:
-   - /Users/dicix/work/www/proiecte:/var/www/html
+   - /Users/dicix/work/www/proiecte/gifter.ro:/var/www/html
 
 mysql:
   build: mysql
