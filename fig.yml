@@ -7,12 +7,15 @@ nginx:
   volumes:
    - /Users/dicix/work/www/proiecte/gifter.ro:/var/www/html
 
+mysqldata:
+  build: mysqldata
+
 mysql:
   build: mysql
   ports:
    - "3306:3306"
   volumes_from:
-   - mysql_data
+   - mysqldata
 
 redis:
   build: redis
