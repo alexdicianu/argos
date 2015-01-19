@@ -36,21 +36,10 @@ sub vcl_recv {
   set    req.http.X-Forwarded-For = client.ip;
 
   #[Drupal] Do not cache these paths.
-  if (req.url ~ "^/install\.php$" || 
-      req.url ~ "^/status\.php$" ||
+  if (req.url ~ "^/status\.php$" ||
       req.url ~ "^/update\.php$" ||
       req.url ~ "^.*/ajax/.*$") {
        return (pass);
-  }
-
-  # Pipe backup_migrate directly
-  if (req.url ~ "^/admin/content/backup_migrate/export" || req.url ~ "^/system/files") {
-    return (pipe);
-  }
-
-  # Do not cache potentially large files.
-  if (req.url ~ "\.(mp3|flv|mov|mp4|mpg|mpeg|avi|dmg)") {
-    return (pipe);
   }
 
   # Allow PURGE from localhost and the box's ip.
@@ -81,10 +70,6 @@ sub vcl_recv {
   # a consistent format, we can reduce the size of the cache and get more hits.=
   # @see: http:// varnish.projects.linpro.no/wiki/FAQ/Compression
   if (req.http.Accept-Encoding) {
-    if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$" || req.url ~ "^/robots\.txt$") {
-      # No point in compressing these
-      remove req.http.Accept-Encoding;
-    }
     if (req.http.Accept-Encoding ~ "gzip") {
       # If the browser supports it, we'll use gzip.
       set req.http.Accept-Encoding = "gzip";
@@ -99,21 +84,13 @@ sub vcl_recv {
     }
   }
 
-  # Always attempt to look-up static files.
-  if (req.url ~ "\.(png|gif|jpeg|jpg|ico|swf|css|js)(\?[a-z0-9]+)?$") {
+  # Always cache the following file types for all users.
+  if (req.url ~ "(?i)\.(png|gif|jpeg|jpg|ico|swf|css|js|html|htm)(\?[a-z0-9]+)?$") {
     unset req.http.Cookie;
   }
 
-  # Always have a has_js
-  if (req.http.Cookie) {
-    set req.http.Cookie = "has_js=1; " + req.http.Cookie;
-  }
-  else {
-    set req.http.Cookie = "has_js=1";
-  }
-
   # Remove all cookies that Drupal doesn't need to know about. ANY remaining
-  # cookie will cause the request to pass-through to Nginx. For the most part
+  # cookie will cause the request to pass-through to Apache. For the most part
   # we always set the NO_CACHE cookie after any POST request, disabling the
   # Varnish cache temporarily. The session cookie allows all authenticated users
   # to pass through as long as they're logged in.
@@ -141,7 +118,8 @@ sub vcl_recv {
 # Cache hit: the object was found in cache.
 sub vcl_hit {
     if (req.request == "PURGE") {
-	      purge;
+	purge;
+        #set obj.ttl = 0s;
         error 200 "Purged.";
     }
 }
@@ -172,42 +150,7 @@ sub vcl_fetch {
   }
 
   # Allow items to be stale if needed.
-  set beresp.grace = 120m;
-
-  # Don't cache something with a zero-length.
-  if (req.url ~ "^/sites/default/files/" && beresp.status == 200
-      && req.http.Content-Length == "0") {
-    set beresp.http.Cache-Control = "no-cache, must-revalidate, post-check=0, pre-check=0";
-    return (hit_for_pass);
-  }
-
-  # Caching for permanent redirects (301s).
-  if (beresp.status == 301) {
-    if (beresp.http.Location == req.http.X-Proto + req.http.Host + req.url) {
-      # Do not cache requests that 301 to themselves for very long.
-      set beresp.http.Cache-Control = "public, max-age=3";
-      set beresp.ttl = 3s;
-      set beresp.http.X-Pantheon-Debug = "Circular redirect detected.";
-    }
-    else if (beresp.http.Location ~ "/\?q=") {
-      # Do not cache 301s that redirect to ?q=
-      # Misfiring clean urls / LIN Media
-      # https://pantheon-systems.desk.com/agent/case/15792
-      set beresp.http.Cache-Control = "public, max-age=3";
-      set beresp.ttl = 3s;
-      set beresp.http.X-Pantheon-Debug = "Wow. Such redirect.";
-    }
-    else if (beresp.http.x-pantheon-endpoint ~ ",") {
-      # Comma in your endpoint header? Go jump in a lake. This is a bug.
-      set beresp.http.Cache-Control = "no-cache, must-revalidate, post-check=0, pre-check=0";
-      set beresp.ttl = 0s;
-    }
-    else if (!beresp.http.Cache-Control) {
-      # Otherwise if no headers, a day is good.
-      set beresp.ttl = 1d;
-      set beresp.http.Cache-Control = "public, max-age=86400";
-    }
-  }
+  set beresp.grace = 6h;
 }
 
 # In the event of an error, show friendlier messages.

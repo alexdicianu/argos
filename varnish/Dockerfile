@@ -4,7 +4,7 @@ MAINTAINER alex dicianu "alex.dicianu@gmail.com"
 # Update the package repository and install applications
 RUN apt-get update -qq && \
   apt-get upgrade -yqq && \
-  apt-get -yqq install varnish && \
+  apt-get -yqq install vim curl wget varnish && \
   apt-get -yqq clean
 
 # Make our custom VCLs available on the container
