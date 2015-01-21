@@ -153,16 +153,12 @@ sub vcl_recv {
 
     # Now other cookies we pass to the backend to potentially vary the content.
     # All other cookies will be stripped before hitting the backend.
-    set req.http.Cookie = regsuball(req.http.Cookie, ";(has_js=)", "; \1=");
-    set req.http.Cookie = regsuball(req.http.Cookie, ";(Drupal[a-zA-Z0-9-_\.]+=)", "; \1=");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(has_js=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(Drupal[a-zA-Z0-9-_\.]+=)", "; \1");
 
     # this is a buddypress pattern used in filtering/sorting content, without it these features will not work
-    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-[a-z]+-(scope|filter))", "; \1=");
-    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-message-[A-Za-z1-9_-]+)", "; \1=");
-
-    # this is a buddypress pattern used in filtering/sorting content, without it these features will not work
-    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-[a-z]+-(scope|filter))", "; \1=");
-    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-message-[A-Za-z1-9_-]+)", "; \1=");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-[a-z]+-(scope|filter))", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-message-[A-Za-z1-9_-]+)", "; \1");
 
     # Strip any cookies lacking the telltale space between the semicolon and cookie name.
     set req.http.Cookie = regsuball(req.http.Cookie, ";[^ ][^;]*", "");
@@ -177,11 +173,13 @@ sub vcl_recv {
       # the page.
       unset req.http.Cookie;
     }
-    else {
+    # If there still are cookies, the default behavior would be to pass them to the backend.
+    # In Pantheon's case this isn't happening.
+    # else {
       # If there is any cookies left (a session or NO_CACHE cookie), do not
       # cache the page. Pass it on to the backend directly.
-      return (pass);
-    }
+      # return (pass);
+    # }
   }
 }
 
