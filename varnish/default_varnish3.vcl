@@ -105,12 +105,12 @@ sub vcl_recv {
   }
 
   # Always have a has_js
-  if (req.http.Cookie) {
-    set req.http.Cookie = "has_js=1; " + req.http.Cookie;
-  }
-  else {
-    set req.http.Cookie = "has_js=1";
-  }
+  # if (req.http.Cookie) {
+  #  set req.http.Cookie = "has_js=1; " + req.http.Cookie;
+  # }
+  # else {
+  #  set req.http.Cookie = "has_js=1";
+  # }
 
   # Remove all cookies that Drupal doesn't need to know about. ANY remaining
   # cookie will cause the request to pass-through to Nginx. For the most part
@@ -118,10 +118,57 @@ sub vcl_recv {
   # Varnish cache temporarily. The session cookie allows all authenticated users
   # to pass through as long as they're logged in.
   if (req.http.Cookie) {
+
+    # Prefix the existing cookie header with ";" to make all cookies
+    # have the form ";$name=$value" for better regexing.
     set req.http.Cookie = ";" + req.http.Cookie;
+
+    # Remove any spaces between semicolons and the beginnings of cookie names.
     set req.http.Cookie = regsuball(req.http.Cookie, "; +", ";");
-    set req.http.Cookie = regsuball(req.http.Cookie, ";(SESS[a-z0-9]+|NO_CACHE)=", "; \1=");
+
+    # Nuke the annoyingly patterned wordpress_test_cookie
+    set req.http.Cookie = regsuball(req.http.Cookie, ";wordpress_test[^;]*", "");
+
+
+    # Loop through our cache-busting cookie patterns.
+    #if (req.http.Cookie ~ ";NO_CACHE=") {
+    #    set req.http.X-Bypass-Cache = "1";
+    #}
+
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(NO_CACHE=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(S+ESS[a-z0-9]+=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(fbs[a-z0-9_]+=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(SimpleSAML[A-Za-z]+=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(PHPSESSID=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(wordpress[A-Za-z0-9_]*=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(wp-[A-Za-z0-9_]+=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(comment_author_[a-z0-9_]+=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(duo_wordpress_auth_cookie=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(duo_secure_wordpress_auth_cookie=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp_completed_create_steps=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp_new_group_id=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(wp-resetpass-[A-Za-z0-9_]+=)", "; \1");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";((wp_)?woocommerce[A-Za-z0-9_-]+=)", "; \1");
+
+
+    # Now other cookies we pass to the backend to potentially vary the content.
+    # All other cookies will be stripped before hitting the backend.
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(has_js=)", "; \1=");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(Drupal[a-zA-Z0-9-_\.]+=)", "; \1=");
+
+    # this is a buddypress pattern used in filtering/sorting content, without it these features will not work
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-[a-z]+-(scope|filter))", "; \1=");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-message-[A-Za-z1-9_-]+)", "; \1=");
+
+    # this is a buddypress pattern used in filtering/sorting content, without it these features will not work
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-[a-z]+-(scope|filter))", "; \1=");
+    set req.http.Cookie = regsuball(req.http.Cookie, ";(bp-message-[A-Za-z1-9_-]+)", "; \1=");
+
+    # Strip any cookies lacking the telltale space between the semicolon and cookie name.
     set req.http.Cookie = regsuball(req.http.Cookie, ";[^ ][^;]*", "");
+
+    # Replace any leading or trailing spaces and semicolons. This leaves
+    # a completely empty cookie header if there are no cookies left.
     set req.http.Cookie = regsuball(req.http.Cookie, "^[; ]+|[; ]+$", "");
 
     if (req.http.Cookie == "") {
@@ -132,7 +179,7 @@ sub vcl_recv {
     }
     else {
       # If there is any cookies left (a session or NO_CACHE cookie), do not
-      # cache the page. Pass it on to Apache directly.
+      # cache the page. Pass it on to the backend directly.
       return (pass);
     }
   }
