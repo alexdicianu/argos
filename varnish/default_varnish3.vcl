@@ -8,12 +8,12 @@
 acl purge {
     "localhost";
     "127.0.0.1";
-    "192.168.59.103";
+    "VARNISH_BACKEND_IP";
 }
 
 backend default {
-    .host = "192.168.59.103";
-    .port = "8080";
+    .host = "VARNISH_BACKEND_IP";
+    .port = "VARNISH_BACKEND_PORT";
     .connect_timeout = 600s;
     .first_byte_timeout = 600s;
     .between_bytes_timeout = 600s;
