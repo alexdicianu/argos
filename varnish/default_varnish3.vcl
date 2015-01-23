@@ -1,8 +1,5 @@
 #
-# Customized VCL file for serving up a Drupal site with multiple back-ends.
-#
-# For more information on this VCL, visit the Lullabot article:
-# http://www.lullabot.com/articles/varnish-multiple-web-servers-drupal
+# Customized VCL file for serving up a Drupal or Wordpress site.
 #
 
 acl purge {

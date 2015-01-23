@@ -5,9 +5,9 @@ nginx:
   ports:
    - "8080:8080"
   volumes:
-   - /Users/dicix/work/www/proiecte/gifter.ro:/var/www/html
-   #- /Users/dicix/work/pantheon/drupal7:/var/www/html
-   #- /Users/dicix/work/www/proiecte/drupal:/var/www/html
+   - /Users/dicix/work/www/proiecte/gifter.ro:/var/www/html/gifter.ro
+   - /Users/dicix/work/pantheon/drupal8:/var/www/html/drupal8
+   - /Users/dicix/work/pantheon/wordpress:/var/www/html/wordpress
   volumes_from:
    - filesdata
 
