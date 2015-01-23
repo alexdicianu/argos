@@ -8,8 +8,8 @@ RUN apt-get update -qq && \
   apt-get -yqq clean
 
 # Make our custom VCLs available on the container
-ADD varnish /etc/default/varnish
-ADD default_varnish3.vcl /etc/varnish/default_varnish3.vcl
+ADD conf/varnish /etc/default/varnish
+ADD conf/default_varnish3.vcl /etc/varnish/default_varnish3.vcl
 
 # @todo find a better way of handling IPs and ports.
 ENV VARNISH_BACKEND_PORT 8080
