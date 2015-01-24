@@ -37,15 +37,6 @@ ADD nginx/nginx.conf /etc/nginx/nginx.conf
 ADD bin/run.sh /etc/run.sh
 RUN chmod a+x /etc/run.sh
 
-# Set environment variables for Redis, the same way pantheon does.
-ENV CACHE_HOST 192.168.59.103
-ENV CACHE_PORT 6379
-
-# For some reason, this doesn't get picked up by php-fpm and we need to specify it in php-fpm.conf (http://l33t.peopleperhour.com/2014/03/13/setting-environment-variables-in-php-fpm-when-using-docker-links/)
-
-ENV REDIS_CACHE_HOST 192.168.59.103
-ENV REDIS_CACHE_PORT 6379
-
 EXPOSE 8080
 
 ENTRYPOINT /etc/run.sh

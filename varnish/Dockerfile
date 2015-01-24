@@ -11,11 +11,6 @@ RUN apt-get update -qq && \
 ADD conf/varnish /etc/default/varnish
 ADD conf/default_varnish3.vcl /etc/varnish/default_varnish3.vcl
 
-# @todo find a better way of handling IPs and ports.
-ENV VARNISH_BACKEND_PORT 8080
-ENV VARNISH_BACKEND_IP 192.168.59.103
-ENV VARNISH_PORT 80
-
 # Expose port 80
 EXPOSE 80
 
