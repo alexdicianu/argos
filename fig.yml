@@ -1,0 +1,47 @@
+nginx:
+  build: nginx
+  # Command "image" can be used if we wish to use the dicix/nginx docker repo. For local repo, we use build.
+  # image: dicix/nginx
+  ports:
+   - "8080:8080"
+  # Volumes mounted this way use the virtualbox vboxsf filesystem. This is extremely slow for sites with 1000+ of files (just like drupal)
+  #volumes:
+  # - /Users/dicix/work/www/proiecte/gifter.ro:/var/www/html/gifter.ro
+  # - /Users/dicix/work/pantheon/drupal8:/var/www/html/drupal8
+  # - /Users/dicix/work/pantheon/wordpress:/var/www/html/wordpress
+  volumes_from:
+   - filesdata
+  environment:
+    # Set environment variables for Redis, the same way pantheon does.
+    CACHE_HOST: 192.168.59.103
+    CACHE_PORT: 6379
+    # For some reason, this doesn't get picked up by php-fpm and we need to specify it in php-fpm.conf (http://l33t.peopleperhour.com/2014/03/13/setting-environment-variables-in-php-fpm-when-using-docker-links/)
+    REDIS_CACHE_HOST: 192.168.59.103
+    REDIS_CACHE_PORT: 6379
+
+filesdata:
+  build: filesdata
+
+mysqldata:
+  build: mysqldata
+
+mysql:
+  build: mysql
+  ports:
+   - "3306:3306"
+  volumes_from:
+   - mysqldata
+
+redis:
+  build: redis
+  ports:
+   - "6379:6379"
+
+varnish:
+  build: varnish
+  ports:
+   - "80:80"
+  environment:
+    VARNISH_BACKEND_PORT: 8080
+    VARNISH_BACKEND_IP: 192.168.59.103
+    VARNISH_PORT: 80
