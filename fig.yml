@@ -5,10 +5,10 @@ nginx:
   ports:
    - "8080:8080"
   # Volumes mounted this way use the virtualbox vboxsf filesystem. This is extremely slow for sites with 1000+ of files (just like drupal)
-  #volumes:
-  # - /Users/dicix/work/www/proiecte/gifter.ro:/var/www/html/gifter.ro
-  # - /Users/dicix/work/pantheon/drupal8:/var/www/html/drupal8
-  # - /Users/dicix/work/pantheon/wordpress:/var/www/html/wordpress
+  volumes:
+   - /Users/dicix/work/pantheon/drupal8:/var/www/html/drupal8
+   - /Users/dicix/work/pantheon/drupal7:/var/www/html/drupal7
+   - /Users/dicix/work/pantheon/wordpress:/var/www/html/wordpress
   volumes_from:
    - filesdata
   environment:

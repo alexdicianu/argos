@@ -20,7 +20,22 @@ RUN echo "extension=redis.so" >> /etc/php5/fpm/php.ini
 RUN echo "extension=redis.so" >> /etc/php5/cli/php.ini
 
 # Drush
-RUN pear channel-discover pear.drush.org && pear install drush/drush
+# RUN pear channel-discover pear.drush.org && pear install drush/drush
+
+# Drush requires composer.
+
+RUN curl -sS https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+RUN ln -s /usr/local/bin/composer /usr/bin/composer
+
+RUN mkdir /usr/drush/
+RUN git clone https://github.com/drush-ops/drush.git /usr/drush/
+RUN chmod u+x /usr/drush/drush
+RUN ln -s /usr/drush/drush /usr/bin/drush
+
+WORKDIR /usr/drush
+RUN composer install
+WORKDIR /var/www/html/
 
 # PHP (adding Pantheon php.ini and php-fpm.conf to the mix)
 ADD php/php.ini /etc/php5/fpm/php.ini
