@@ -1,11 +1,9 @@
-Argos - A Docker stack for local development 
+Argos
 =================
 
-A light sandbox Docker image for PHP web development that is based on a Ubuntu 14.04 OS. 
-
+A light Docker based sandbox image for PHP web development that is based on a Ubuntu 14.04 OS. 
 
 ![Docker logo](http://upload.wikimedia.org/wikipedia/commons/7/79/Docker_(container_engine)_logo.png "Docker logo")
-
 
 This image with comes built with nginx, PHP-FPM, Drush, MySQL, Redis and Varnish.
 
