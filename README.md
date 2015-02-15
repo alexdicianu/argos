@@ -1,4 +1,4 @@
-Docker Drupal image based on Ubuntu 14.04
+Argos - A based Docker stack for local development 
 =================
 
 A light sandbox Docker image for PHP web development that is based on a Ubuntu 14.04 OS. 
