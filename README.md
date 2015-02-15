@@ -38,7 +38,7 @@ Author two (author contact info)
 <h5>Local environment</h5>
 
 <strong>Build:</strong><br />
-<code>fig up -d</code><br />
+<code>docker-compose up -d</code><br />
 
 <strong>Manual run:</strong><br />
 <code>docker run -d -t -p 8080:8080 --name nginx --link mysql:db -v /Users/dicix/work/www/proiecte:/var/www/html dicix/nginx</code><br />
