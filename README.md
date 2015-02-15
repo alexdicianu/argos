@@ -1,7 +1,7 @@
 Docker Drupal image based on Ubuntu 14.04
 =================
 
-A light sandbox Docker image for PHP web development that is based on a Fedora 20 OS. 
+A light sandbox Docker image for PHP web development that is based on a Fedora 14.04 OS. 
 
 
 ![Docker logo](http://upload.wikimedia.org/wikipedia/commons/7/79/Docker_(container_engine)_logo.png "Docker logo")
