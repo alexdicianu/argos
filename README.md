@@ -1,11 +1,9 @@
-Docker Drupal image based on Ubuntu 14.04
+Argos
 =================
 
-A light sandbox Docker image for PHP web development that is based on a Fedora 20 OS. 
-
+A light Docker based sandbox image for PHP web development that is based on a Ubuntu 14.04 OS. 
 
 ![Docker logo](http://upload.wikimedia.org/wikipedia/commons/7/79/Docker_(container_engine)_logo.png "Docker logo")
-
 
 This image with comes built with nginx, PHP-FPM, Drush, MySQL, Redis and Varnish.
 
@@ -38,7 +36,7 @@ Author two (author contact info)
 <h5>Local environment</h5>
 
 <strong>Build:</strong><br />
-<code>fig up -d</code><br />
+<code>docker-compose up -d</code><br />
 
 <strong>Manual run:</strong><br />
 <code>docker run -d -t -p 8080:8080 --name nginx --link mysql:db -v /Users/dicix/work/www/proiecte:/var/www/html dicix/nginx</code><br />
