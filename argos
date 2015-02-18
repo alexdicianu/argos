@@ -55,7 +55,6 @@ function add_site {
 	for i in `grep -in '/var/www/html/' $file | awk -F: '{print $1}' | sort -nr`
 	do
 		tempfile=$(mktemp /tmp/argos_docker_compose.XXXXXXXXXX)
-		echo $tempfile
 		cat $file | awk "{
 			if (NR == ($i+1) ) {
 				print \"$VOLUME\"
