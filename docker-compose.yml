@@ -9,6 +9,8 @@ nginx:
    - /Users/dicix/work/pantheon/drupal8:/var/www/html/drupal8
    - /Users/dicix/work/pantheon/drupal7:/var/www/html/drupal7
    - /Users/dicix/work/pantheon/wordpress:/var/www/html/wordpress
+   - /Users/dicix/test:/var/www/html/alex
+   - /Users/dicix/test2:/var/www/html/alex2
   volumes_from:
    - filesdata
   environment:

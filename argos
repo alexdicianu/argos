@@ -4,33 +4,67 @@ function add_site {
 	local i
 	local tempfile
 
-	if [ $# -eq 0 ] || [ $# -gt 3 ]; then
+	if [ $# -eq 0 ] || [ $# -gt 4 ]; then
 		exit;
 	else
 		local site=$1
 		local path=$2
+		local cms=$3
 	fi
 
-	# 1. Add line in fig.yml
+	# 1. Add line in docker-compose.yml
 	# 2. Add nginx/nginx/sites/SITENAME.conf (create template)
 	# 3. Add VOLUME in filesdata/Dockerfile
 
-	############# 1. modifying fig.yml ###############
-	for i in `grep -in '/var/www/html/' fig.yml | awk -F: '{print $1}' | sort -nr`
+	local file='docker-compose.yml'
+
+	############# 1. modifying docker-compose.yml ###############
+
+	for i in `grep -in '/var/www/html/' $file | awk -F: '{print $1}' | sort -nr`
 	do
-		tempfile=$(mktemp /tmp/argos_fig.XXXXXXXXXX)
-		cat fig.yml | awk "{
+		tempfile=$(mktemp /tmp/argos_docker_compose.XXXXXXXXXX)
+		cat $file | awk "{
 			if (NR == ($i+1) ) {
 				print \"   - $path:/var/www/html/$site\"
 			}
 		}7" > $tempfile
-		rm fig.yml && mv $tempfile fig.yml
+		rm $file && mv $tempfile $file
 		break
 	done
 
 	############# 2. Add nginx/nginx/sites/SITENAME.conf ###############
 
+	cp ./nginx/nginx/sites/default ./nginx/nginx/sites/$site.conf
+	sed -i .txt "s/__SITE_NAME__/$site/" ./nginx/nginx/sites/$site.conf
+
+	# Stupid OSX sed command won't work without giving an extension to the -i parameter.
+	# Need to manually remove the backup file it creates.
+	rm ./nginx/nginx/sites/$site.conf.txt
+
 	############# 3. Add VOLUME in filesdata/Dockerfile ###############
+
+	if [ "$cms" = "wordpress" ]
+	then
+		local VOLUME="VOLUME /var/www/html/$site/wp-content/uploads"
+	else
+		local VOLUME="VOLUME /var/www/html/$site/sites/default/files"
+	fi
+
+	file='filesdata/Dockerfile'
+	i=''
+	for i in `grep -in '/var/www/html/' $file | awk -F: '{print $1}' | sort -nr`
+	do
+		tempfile=$(mktemp /tmp/argos_docker_compose.XXXXXXXXXX)
+		echo $tempfile
+		cat $file | awk "{
+			if (NR == ($i+1) ) {
+				print \"$VOLUME\"
+			}
+		}7" > $tempfile
+		rm $file && mv $tempfile $file
+		break
+	done
+
 
 	echo "Site $site added successfully."
 }
@@ -63,7 +97,7 @@ function list_sites {
 
 if [ $# -eq 0 ]
 then
-	echo "Usage: argos <options> [site] [path]"
+	echo "Usage: argos <options> [site] [path] [cms]"
 	echo
 	echo "argos is a little site management utility that makes life easier for adding and removing sites."
 	echo
@@ -71,13 +105,14 @@ then
 	echo "    -a sitename path   Adds a site."
 	echo "       sitename        - the name you wish your site to have,"
 	echo "       path            - the path on your local machine (e.g. /Users/alex/work/pantheon/drupal8/)."
+	echo "       cms             - drupal or wordpress."
 	echo "    -d sitename        Deletes a site" 
 	echo "    -l                 Lists all your available sites" 
 	exit 0
 fi
 
 case "$1" in
-	-a) add_site $2 $3 ;;
+	-a) add_site $2 $3 $4 ;;
 	-d) delete_site $2 ;;
 	-l) list_sites ;;
 	--) ;;
