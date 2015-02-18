@@ -1,0 +1,85 @@
+#!/bin/bash
+
+function add_site {
+	local i
+	local tempfile
+
+	if [ $# -eq 0 ] || [ $# -gt 3 ]; then
+		exit;
+	else
+		local site=$1
+		local path=$2
+	fi
+
+	# 1. Add line in fig.yml
+	# 2. Add nginx/nginx/sites/SITENAME.conf (create template)
+	# 3. Add VOLUME in filesdata/Dockerfile
+
+	############# 1. modifying fig.yml ###############
+	for i in `grep -in '/var/www/html/' fig.yml | awk -F: '{print $1}' | sort -nr`
+	do
+		tempfile=$(mktemp /tmp/argos_fig.XXXXXXXXXX)
+		cat fig.yml | awk "{
+			if (NR == ($i+1) ) {
+				print \"   - $path:/var/www/html/$site\"
+			}
+		}7" > $tempfile
+		rm fig.yml && mv $tempfile fig.yml
+		break
+	done
+
+	############# 2. Add nginx/nginx/sites/SITENAME.conf ###############
+
+	############# 3. Add VOLUME in filesdata/Dockerfile ###############
+
+	echo "Site $site added successfully."
+}
+
+function delete_site {
+	if [ $# -eq 0 ] || [ $# -gt 2 ]; then
+		exit;
+	else
+		local site=$1
+	fi
+
+	echo "Deleteing site $site"
+}
+
+# Reads through the yaml file for getting all the mounted sites in /var/www/html/*.
+function list_sites {
+	local site
+	local site_name
+
+	for site in `grep -i '/var/www/html/' ./*.yml | cut -d- -f2`
+	do
+		site_name=`echo $site | cut -d: -f2 | awk -F/ {'print $5'}`
+		echo "$site_name ($site)"
+	done
+}
+
+################################
+##### Script starts here #######
+################################
+
+if [ $# -eq 0 ]
+then
+	echo "Usage: argos <options> [site] [path]"
+	echo
+	echo "argos is a little site management utility that makes life easier for adding and removing sites."
+	echo
+	echo "Commands:"
+	echo "    -a sitename path   Adds a site."
+	echo "       sitename        - the name you wish your site to have,"
+	echo "       path            - the path on your local machine (e.g. /Users/alex/work/pantheon/drupal8/)."
+	echo "    -d sitename        Deletes a site" 
+	echo "    -l                 Lists all your available sites" 
+	exit 0
+fi
+
+case "$1" in
+	-a) add_site $2 $3 ;;
+	-d) delete_site $2 ;;
+	-l) list_sites ;;
+	--) ;;
+	*) echo "argos $1 is not a recognized option" ;;
+esac
