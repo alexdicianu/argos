@@ -40,16 +40,43 @@ curl -L https://github.com/docker/fig/releases/download/1.1.0-rc2/docker-compose
 Naboo wedge jawa coruscant dooku naboo mon.
 
 ## Workflow
-`chmod u+x argos`
+```
+chmod u+x argos
+```
 
 Adding a site:
-`./argos add site.com /Users/alex/www/site.com`
+```
+./argos add site.com /Users/alex/www/site.com
+```
 
 Removing a site:
-`./argos del site.com`
+```
+./argos del site.com
+```
 
 See all your sites:
-`./argos site-list` or `./argos sl`
+```
+./argos site-list
+``` 
+or 
+```
+./argos sl
+```
+
+Seeing your running containers:
+```
+docker-compose ps
+```
+
+Building your stack:
+```
+docker-compose build
+```
+
+Launching your stack:
+```
+docker-compose up -d
+```
 
 ## Contributing
 We are now looking into the already running container to see if there is a newer image downloaded. If there is a newer we stop the [contribution](#).
