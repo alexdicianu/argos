@@ -8,5 +8,6 @@ VOLUME /var/www/html/wordpress/wp-content/uploads
 
 # Creating a volume container for drupal itself. Not as flexible, but a lot faster.
 #VOLUME /var/www/html/drupal8/
+VOLUME /var/www/html/drupaltest/sites/default/files
 
 CMD /bin/bash

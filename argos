@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# 1. Add line in docker-compose.yml
+# 2. Add nginx/nginx/sites/SITENAME.conf (create template)
+# 3. Add VOLUME in filesdata/Dockerfile
+# 4. Create database ?
+# 5. Run docker-compose build && docker-compose up -d
 function add_site {
 	local i
 	local tempfile
@@ -12,11 +17,7 @@ function add_site {
 		local cms=$3
 	fi
 
-	# 1. Add line in docker-compose.yml
-	# 2. Add nginx/nginx/sites/SITENAME.conf (create template)
-	# 3. Add VOLUME in filesdata/Dockerfile
-
-	local file='docker-compose.yml'
+	local file='./docker-compose.yml'
 
 	############# 1. modifying docker-compose.yml ###############
 
@@ -37,7 +38,7 @@ function add_site {
 	cp ./nginx/nginx/sites/default ./nginx/nginx/sites/$site.conf
 	sed -i .txt "s/__SITE_NAME__/$site/" ./nginx/nginx/sites/$site.conf
 
-	# Stupid OSX sed command won't work without giving an extension to the -i parameter.
+	# Stupid OSX sed command won\'t work without giving an extension to the -i parameter.
 	# Need to manually remove the backup file it creates.
 	rm ./nginx/nginx/sites/$site.conf.txt
 
@@ -50,7 +51,7 @@ function add_site {
 		local VOLUME="VOLUME /var/www/html/$site/sites/default/files"
 	fi
 
-	file='filesdata/Dockerfile'
+	file='./filesdata/Dockerfile'
 	i=''
 	for i in `grep -in '/var/www/html/' $file | awk -F: '{print $1}' | sort -nr`
 	do
@@ -64,10 +65,69 @@ function add_site {
 		break
 	done
 
+	############# 4. Create database ###############
 
-	echo "Site $site added successfully."
+	local database
+	echo -n "Do you wish to create the database as well (the mysql container needs to be running)? [Y/n]: "
+	read database
+
+	while [ 1 ]
+	do
+		case $database in
+			Y|y) 
+				read -p "Please enter the database name: " database
+				mysql -u root -proot -h $(boot2docker ip) -e "CREATE DATABASE $database"
+				break ;;
+			N|n) 
+				# Continuing the process. 
+				break ;;
+			*) 
+				echo -n "Option not recognized. Do you wish to create the database as well (mysql needs to be running)? [Y/n]: " 
+				read database ;;
+		esac
+	done
+
+	############## 5. Run docker-compose build && docker-compose up -d ##############
+
+	docker-compose stop && docker-compose build && docker-compose up -d
+
+	echo
+	echo "=============================================================================="
+	echo
+	echo "The site $site was added successfully."
+	echo
+	echo "You can now add the line below to your local hosts file (usually /etc/hosts):"
+	echo $site $(boot2docker ip)
+	echo
+	echo "Site url: http://$site/"
+	echo
+	echo "MySQL credentials:"
+	echo "Host: $(boot2docker ip)"
+	echo "User: root"
+	echo "Password: root"
+	echo "Port: 3306"
+	echo
+	echo "Redis credentials:"
+	echo "Host: $(boot2docker ip)"
+	echo "Port: 6379"
+	echo "redis-cli -h $(boot2docker ip) -p 6379"
+	echo
+	echo "For connecting to any container through SSH use the command below:"
+	echo "docker exec -it CONTAINER_NAME /bin/bash"
+	echo
+	echo
+
+	docker-compose ps
+	
 }
 
+# 1. Confirmation
+# 2. Delete database ?
+# 3. Stop containers docker-compose stop
+# 4. Remove line in docker-compose.yml
+# 5. Remove nginx/nginx/sites/SITENAME.conf
+# 6. Remove line VOLUME in filesdata/Dockerfile
+# 7. Rebuild && restart docker-compose
 function delete_site {
 	if [ $# -eq 0 ] || [ $# -gt 2 ]; then
 		exit;
@@ -75,7 +135,97 @@ function delete_site {
 		local site=$1
 	fi
 
-	echo "Deleteing site $site"
+	############# 1. Confirmation ###############
+	local confirm
+	echo -n "Do you wish to delete the site $site? [Y/n]: "
+	read confirm
+
+	while [ 1 ]
+	do
+		case $confirm in
+			Y|y) 
+				# Continuing the process. 
+				break ;;
+			N|n) 
+				# Stopping the execution. 
+				echo "Annulation confirmed. Nothing was done."
+				exit 0
+				break ;;
+			*) 
+				echo -n "Option not recognized. Do you wish to delete the site $site? [Y/n]: "
+				read confirm ;;
+		esac
+	done
+
+	############# 2. Delete database ###############
+	local database
+	echo -n "Do you wish to delete the database as well (a backup will be created automatically and the mysql container needs to be running)? [Y/n]: "
+	read database
+
+	while [ 1 ]
+	do
+		case $database in
+			Y|y) 
+				read -p "Please enter the database name: " database
+
+				if [ ! -d "./db_backups/" ]; then
+					mkdir ./db_backups/
+				fi
+				
+				mysqldump -u root -proot -h $(boot2docker ip) $database > ./db_backups/$site.sql
+
+				if [ $? -eq 0 ]; then
+					echo "Saved a database copy in $(pwd)/db_backups/$site.sql"
+				fi
+
+				mysql -u root -proot -h $(boot2docker ip) -e "DROP DATABASE $database"
+				
+				break ;;
+			N|n) 
+				# Continuing the process. 
+				break ;;
+			*) 
+				echo -n "Option not recognized. Do you wish to delete the database as well (mysql needs to be running)? [Y/n]: " 
+				read database ;;
+		esac
+	done
+
+	############# 3. Stoping containers ###############
+	docker-compose stop
+
+	############# 4. Remove line in docker-compose.yml ###############
+	sed -i .txt "/\/var\/www\/html\/$site/d" ./docker-compose.yml
+	echo
+	echo "Removed reference from docker-compose.yml."
+
+	# Stupid OSX sed command won\'t work without giving an extension to the -i parameter.
+	# Need to manually remove the backup file it creates.
+	rm ./docker-compose.yml.txt
+
+	############## 5. Remove nginx/nginx/sites/SITENAME.conf ##############
+	rm ./nginx/nginx/sites/$site.conf
+	echo
+	echo "Removed nginx configuration file."
+
+	############## 6. Remove line VOLUME in filesdata/Dockerfile ###############
+	sed -i .txt "/\/var\/www\/html\/$site/d" ./filesdata/Dockerfile
+	echo
+	echo "Removed volume container."
+
+	# Stupid OSX sed command won\'t work without giving an extension to the -i parameter.
+	# Need to manually remove the backup file it creates.
+	rm ./filesdata/Dockerfile.txt
+
+	############# 6. Rebuilding && restarting containers ###############
+	echo
+	echo "Relaunching the containers ..."
+
+	# Sometimes this gets messed up.
+	docker rm argos_nginx_1
+	docker-compose build && docker-compose up -d
+
+	echo
+	echo "Site $site deleted."
 }
 
 # Reads through the yaml file for getting all the mounted sites in /var/www/html/*.
@@ -96,24 +246,25 @@ function list_sites {
 
 if [ $# -eq 0 ]
 then
-	echo "Usage: argos <options> [site] [path] [cms]"
+	echo "Usage: ./argos command [site] [path] [cms]"
 	echo
 	echo "argos is a little site management utility that makes life easier for adding and removing sites."
 	echo
 	echo "Commands:"
-	echo "    -a sitename path   Adds a site."
-	echo "       sitename        - the name you wish your site to have,"
-	echo "       path            - the path on your local machine (e.g. /Users/alex/work/pantheon/drupal8/)."
-	echo "       cms             - drupal or wordpress."
-	echo "    -d sitename        Deletes a site" 
-	echo "    -l                 Lists all your available sites" 
+	echo "    add                    Adds a site."
+	echo "      [sitename]             - the name you wish your site to have."
+	echo "      [path]                 - the path on your local machine (e.g. /Users/alex/work/pantheon/drupal8/)."
+	echo "      [cms]                  - drupal or wordpress (defaults to drupal)."
+	echo "    delete (or del)        Deletes a site."
+	echo "      [sitename]             - the name of the site you wish to delete." 
+	echo "    site-list (or sl)      Lists all your available sites." 
 	exit 0
 fi
 
 case "$1" in
-	-a) add_site $2 $3 $4 ;;
-	-d) delete_site $2 ;;
-	-l) list_sites ;;
+	add) add_site $2 $3 $4 ;;
+	delete|del) delete_site $2 ;;
+	site-list|sl) list_sites ;;
 	--) ;;
 	*) echo "argos $1 is not a recognized option" ;;
 esac
