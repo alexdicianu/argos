@@ -19,6 +19,38 @@ Naboo wedge jawa coruscant dooku naboo mon. Darth mandalore lobot c-3p0 hutt nab
 * [Uninstallation](#)
 * [Contribution](#)
 
+## Getting Started
+Naboo wedge jawa coruscant dooku naboo mon.
+
+## Installation
+Install docker (and boot2docker if you're on OSX or Windows) following the instructions from this page: https://docs.docker.com/#installation-guides
+You also need to install docker-compose
+```
+$ yum -y install git docker python-pip
+$ pip install docker-compose==1.1.0-rc2
+$ systemctl start docker
+$ systemctl enable docker
+```
+or
+```
+curl -L https://github.com/docker/fig/releases/download/1.1.0-rc2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose; chmod +x /usr/local/bin/docker-compose
+```
+
+## Components
+Naboo wedge jawa coruscant dooku naboo mon.
+
+## Workflow
+`chmod u+x argos`
+
+Adding a site:
+`./argos add site.com /Users/alex/www/site.com`
+
+Removing a site:
+`./argos del site.com`
+
+See all your sites:
+`./argos site-list` or `./argos sl`
+
 ## Contributing
 We are now looking into the already running container to see if there is a newer image downloaded. If there is a newer we stop the [contribution](#).
 
