@@ -45,9 +45,8 @@ chmod u+x argos
 ```
 
 Adding a site:
-```
-./argos add site.com /Users/alex/www/site.com
-```
+* Drupal: `./argos add site.com /Users/alex/www/site.com drupal`
+* Wordpress: `./argos add site.com /Users/alex/www/site.com wordpress`
 
 Removing a site:
 ```
