@@ -251,20 +251,20 @@ then
 	echo "argos is a little site management utility that makes life easier for adding and removing sites."
 	echo
 	echo "Commands:"
-	echo "    add                    Adds a site."
-	echo "      [sitename]             - the name you wish your site to have."
-	echo "      [path]                 - the path on your local machine (e.g. /Users/alex/work/pantheon/drupal8/)."
-	echo "      [cms]                  - drupal or wordpress (defaults to drupal)."
-	echo "    delete (or del)        Deletes a site."
-	echo "      [sitename]             - the name of the site you wish to delete." 
-	echo "    site-list (or sl)      Lists all your available sites." 
+	echo "    add                          Adds a site."
+	echo "      [sitename]                 - the name you wish your site to have."
+	echo "      [path]                     - the path on your local machine (e.g. /Users/alex/work/pantheon/drupal8/)."
+	echo "      [cms]                      - drupal or wordpress (defaults to drupal)."
+	echo "    delete (alias del)           Deletes a site."
+	echo "      [sitename]                 - the name of the site you wish to delete." 
+	echo "    site-list (alias sl, ps)     Lists all your available sites." 
 	exit 0
 fi
 
 case "$1" in
 	add) add_site $2 $3 $4 ;;
 	delete|del) delete_site $2 ;;
-	site-list|sl) list_sites ;;
+	site-list|sl|ps) list_sites ;;
 	--) ;;
 	*) echo "argos $1 is not a recognized option" ;;
 esac
