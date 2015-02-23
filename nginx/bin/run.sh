@@ -8,14 +8,15 @@ sed -i "s/REDIS_CACHE_PORT/$REDIS_CACHE_PORT/" /etc/php5/fpm/pool.d/www.conf
 # Drupal
 for site in /var/www/html/*/sites/default
 do
-	chown -R www-data:www-data files/
+	chown -R www-data:www-data $site/files/
 	chmod -R 0755 files/
 done
 
 # Wordpress
+site=''
 for site in /var/www/html/*/wp-content
 do
-	chown -R www-data:www-data upload/
+	chown -R www-data:www-data $site/upload/
 	chmod -R 0755 files/
 done
 
