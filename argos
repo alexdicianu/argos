@@ -272,14 +272,36 @@ then
 	echo "    delete (alias del)           Deletes a site."
 	echo "      [sitename]                 - the name of the site you wish to delete." 
 	echo "    site-list (alias sl, ps)     Lists all your available sites." 
+	echo "    build                        Build or rebuild services." 
+	echo "    start                        Start services."
+	echo "    restart                      Restart services." 
+	echo "    stop                         Stops services." 
+	echo "    up                           Create and start containers."
+	echo "    ps                           List containers." 
 	exit 0
 fi
 
 case "$1" in
-	add) add_site $2 $3 $4 ;;
-	delete|del) delete_site $2 ;;
-	site-list|sl|ps) list_sites ;;
-	init) init ;;
+	add) 
+		add_site $2 $3 $4 ;;
+	delete|del) 
+		delete_site $2 ;;
+	site-list|sl) 
+		list_sites ;;
+	init) 
+		init ;;
+	up) 
+		up ;;
+	start) 
+		docker-compose start ;;
+	restart) 
+		docker-compose restart ;;
+	stop) 
+		docker-compose stop ;;
+	build) 
+		docker-compose build ;;
+	ps) 
+		docker-compose ps ;;
 	--) ;;
 	*) echo "argos $1 is not a recognized option" ;;
 esac
