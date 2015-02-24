@@ -1,5 +1,5 @@
 server {
-        listen          0.0.0.0:80805;
+        listen          0.0.0.0:55555;
 
         server_name     __SITE_NAME__;
         root            /var/www/html/__SITE_NAME__;
