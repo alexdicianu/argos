@@ -3,7 +3,7 @@ nginx:
   # Command "image" can be used if we wish to use the dicix/nginx docker repo. For local repo, we use build.
   # image: dicix/nginx
   ports:
-   - "8080:8080"
+   - "80805:80805"
   # Volumes mounted this way use the virtualbox vboxsf filesystem. This is extremely slow for sites with 1000+ of files (just like drupal)
   volumes:
    - /Users/dicix/work/pantheon/drupal8:/var/www/html/drupal8
@@ -43,6 +43,6 @@ varnish:
   ports:
    - "80:80"
   environment:
-    VARNISH_BACKEND_PORT: 8080
+    VARNISH_BACKEND_PORT: 80805
     VARNISH_BACKEND_IP: 192.168.59.103
     VARNISH_PORT: 80

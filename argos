@@ -240,6 +240,19 @@ function list_sites {
 	done
 }
 
+# Runs the initial configuration on the docker-compose.yml file.
+function init {
+	local boot2docker_ip=`boot2docker ip`
+
+	sed -i .txt "s/__REDIS_HOST__/$boot2docker_ip/" ./docker-compose.yml
+	rm ./docker-compose.yml.txt
+
+	sed -i .txt "s/__NGINX_HOST__/$boot2docker_ip/" ./docker-compose.yml
+	rm ./docker-compose.yml.txt
+
+	echo "Initialization complete. You can not use your environment."
+}
+
 ################################
 ##### Script starts here #######
 ################################
@@ -251,6 +264,7 @@ then
 	echo "argos is a little site management utility that makes life easier for adding and removing sites."
 	echo
 	echo "Commands:"
+	echo "    init                         Sets up the docker configuration (docker-compose.yml) to use the right ports and IP addresses." 
 	echo "    add                          Adds a site."
 	echo "      [sitename]                 - the name you wish your site to have."
 	echo "      [path]                     - the path on your local machine (e.g. /Users/alex/work/pantheon/drupal8/)."
@@ -265,6 +279,7 @@ case "$1" in
 	add) add_site $2 $3 $4 ;;
 	delete|del) delete_site $2 ;;
 	site-list|sl|ps) list_sites ;;
+	init) init ;;
 	--) ;;
 	*) echo "argos $1 is not a recognized option" ;;
 esac
