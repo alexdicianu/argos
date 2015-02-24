@@ -250,7 +250,7 @@ function init {
 	sed -i .txt "s/__NGINX_HOST__/$boot2docker_ip/" ./docker-compose.yml
 	rm ./docker-compose.yml.txt
 
-	echo "Initialization complete. You can not use your environment."
+	echo "Initialization complete. You can now use your environment."
 }
 
 ################################
