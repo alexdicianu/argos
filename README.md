@@ -20,16 +20,10 @@ Naboo wedge jawa coruscant dooku naboo mon. Darth mandalore lobot c-3p0 hutt nab
 * [Contribution](#)
 
 ## Getting Started
-#. Install boot2docker, as explained on here: https://docs.docker.com/#installation-guides
-#. Install docker-compose by executing the following curl command in your terminal:
-```
-curl -L https://github.com/docker/fig/releases/download/1.1.0-rc2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose; chmod +x /usr
-```
-#. Clone this repo locally and go the cloned folder.
-#. Run the following command for initializing the configuration.
-```
-./argos init
-```
+1. Install boot2docker, as explained on here: https://docs.docker.com/#installation-guides
+2. Install docker-compose by executing the following curl command in your terminal: `curl -L https://github.com/docker/fig/releases/download/1.1.0-rc2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose; chmod +x /usr`
+3. Clone this repo locally and go the cloned folder.
+4. Run the following command for initializing the configuration: `./argos init`
 
 ## Installation
 Install docker (and boot2docker if you're on OSX or Windows) following the instructions from this page: https://docs.docker.com/#installation-guides
