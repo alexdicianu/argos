@@ -1,5 +1,19 @@
 #!/bin/bash
 
+function argos_host_ip {
+	local host_ip
+
+	host_ip=`echo $DOCKER_HOST | awk -F/ '{print $3}' | awk -F: '{print $1}'`
+
+	if [ "$host_ip" = "" ]
+	then
+		# If Linux? Does the $DOCKER_HOST variable exist in Linux.
+		echo "127.0.0.1"
+	fi
+
+	echo $host_ip
+}
+
 # 1. Add line in docker-compose.yml
 # 2. Add nginx/nginx/sites/SITENAME.conf (create template)
 # 3. Add VOLUME in filesdata/Dockerfile
@@ -76,7 +90,7 @@ function add_site {
 		case $database in
 			Y|y) 
 				read -p "Please enter the database name: " database
-				mysql -u root -proot -h $(boot2docker ip) -e "CREATE DATABASE $database"
+				mysql -u root -proot -h $(argos_host_ip) -e "CREATE DATABASE $database"
 				break ;;
 			N|n) 
 				# Continuing the process. 
@@ -97,20 +111,20 @@ function add_site {
 	echo "The site $site was added successfully."
 	echo
 	echo "You can now add the line below to your local hosts file (usually /etc/hosts):"
-	echo $site $(boot2docker ip)
+	echo $site $(argos_host_ip)
 	echo
 	echo "Site url: http://$site/"
 	echo
 	echo "MySQL credentials:"
-	echo "Host: $(boot2docker ip)"
+	echo "Host: $(argos_host_ip)"
 	echo "User: root"
 	echo "Password: root"
 	echo "Port: 3306"
 	echo
 	echo "Redis credentials:"
-	echo "Host: $(boot2docker ip)"
+	echo "Host: $(argos_host_ip)"
 	echo "Port: 6379"
-	echo "redis-cli -h $(boot2docker ip) -p 6379"
+	echo "redis-cli -h $(argos_host_ip) -p 6379"
 	echo
 	echo "For connecting to any container through SSH use the command below:"
 	echo "docker exec -it CONTAINER_NAME /bin/bash"
@@ -172,13 +186,13 @@ function delete_site {
 					mkdir ./db_backups/
 				fi
 				
-				mysqldump -u root -proot -h $(boot2docker ip) $database > ./db_backups/$site.sql
+				mysqldump -u root -proot -h $(argos_host_ip) $database > ./db_backups/$site.sql
 
 				if [ $? -eq 0 ]; then
 					echo "Saved a database copy in $(pwd)/db_backups/$site.sql"
 				fi
 
-				mysql -u root -proot -h $(boot2docker ip) -e "DROP DATABASE $database"
+				mysql -u root -proot -h $(argos_host_ip) -e "DROP DATABASE $database"
 				
 				break ;;
 			N|n) 
@@ -242,7 +256,7 @@ function list_sites {
 
 # Runs the initial configuration on the docker-compose.yml file.
 function init {
-	local boot2docker_ip=`boot2docker ip`
+	local boot2docker_ip=`argos_host_ip`
 
 	sed -i .txt "s/__REDIS_HOST__/$boot2docker_ip/" ./docker-compose.yml
 	rm ./docker-compose.yml.txt
@@ -257,7 +271,7 @@ function init {
 ##### Script starts here #######
 ################################
 
-if [ $# -eq 0 ]
+if [ $# -eq 0 ] || [ "$1" == "help" ]
 then
 	echo "Usage: ./argos command [site] [path] [cms]"
 	echo
@@ -278,6 +292,9 @@ then
 	echo "    stop                         Stops services." 
 	echo "    up                           Create and start containers."
 	echo "    ps                           List containers." 
+	echo "    help                         List all possible commands." 
+	echo "    ssh                          Gets SSH accees into the container with the [container_name] name." 
+	echo "      [container_name]           - the container to which you want SSH access" 
 	exit 0
 fi
 
@@ -291,7 +308,7 @@ case "$1" in
 	init) 
 		init ;;
 	up) 
-		up ;;
+		docker-compose up -d ;;
 	start) 
 		docker-compose start ;;
 	restart) 
@@ -302,6 +319,8 @@ case "$1" in
 		docker-compose build ;;
 	ps) 
 		docker-compose ps ;;
+	ssh) 
+		docker exec -it $2 /bin/bash ;;
 	--) ;;
 	*) echo "argos $1 is not a recognized option" ;;
 esac
