@@ -1,9 +1,9 @@
-FROM ubuntu:14.04
-MAINTAINER alex dicianu "alex.dicianu@gmail.com"
-RUN apt-get update
+FROM fedora:21
+MAINTAINER Pantheon Systems
 
-RUN apt-get -y install redis-server redis-tools
+RUN yum -y update && yum clean all
+RUN yum -y install redis && yum clean all
 
 EXPOSE 6379
-ENTRYPOINT [ "/usr/bin/redis-server" ]
-CMD []
+
+CMD [ "redis-server" ]
