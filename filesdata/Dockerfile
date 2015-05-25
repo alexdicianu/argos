@@ -5,4 +5,4 @@ RUN yum -y update && yum clean all
 
 VOLUME /var/www/data
 
-CMD /bin/bash
+CMD ["/bin/bash"]
