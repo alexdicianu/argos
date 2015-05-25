@@ -1,6 +1,7 @@
-FROM ubuntu:14.04
+FROM fedora:21
+MAINTAINER Pantheon Systems
 
-RUN apt-get update -qq && apt-get upgrade -yqq
+RUN yum -y update && yum clean all
 
 VOLUME /var/lib/mysql
 
