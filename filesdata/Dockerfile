@@ -1,13 +1,8 @@
-FROM ubuntu:14.04
+FROM fedora:21
+MAINTAINER Pantheon Systems
 
-RUN apt-get update -qq && apt-get upgrade -yqq
+RUN yum -y update && yum clean all
 
-VOLUME /var/www/html/drupal7/sites/default/files
-VOLUME /var/www/html/drupal8/sites/default/files
-VOLUME /var/www/html/wordpress/wp-content/uploads
-
-# Creating a volume container for drupal itself. Not as flexible, but a lot faster.
-#VOLUME /var/www/html/drupal8/
-VOLUME /var/www/html/drupaltest/sites/default/files
+VOLUME /var/www/data
 
 CMD /bin/bash
