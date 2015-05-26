@@ -1,0 +1,10 @@
+machine:
+  services:
+    - docker
+test:
+  pre:
+    - pyenv global 2.7.6
+    - sudo pip install docker-compose
+  override:
+    - docker-compose -up -d
+    - exit 
