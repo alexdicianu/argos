@@ -5,5 +5,4 @@ test:
   pre: 
     - sudo pip install docker-compose
   override:
-    - docker-compose -up -d
-    - exit 
+    - docker-compose -up -d 
