@@ -1,15 +1,14 @@
-FROM ubuntu:14.04
+FROM fedora:21
+MAINTAINER Pantheon Systems
 
-RUN apt-get update
-RUN apt-get upgrade -y
+RUN yum -y update && yum clean all
+RUN yum -y install mariadb-server pwgen psmisc net-tools hostname && \
+    yum clean all
 
-RUN apt-get -y install mysql-client mysql-server
+ADD scripts /scripts
+RUN chmod 755 /scripts/*
 
-RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
-
-ADD bin/run.sh /etc/run.sh
-RUN chmod a+x /etc/run.sh
-
+VOLUME ["/var/lib/mysql", "/var/log/mysql"]
 EXPOSE 3306
 
-ENTRYPOINT /etc/run.sh
+CMD ["/bin/bash", "/scripts/start.sh"]
