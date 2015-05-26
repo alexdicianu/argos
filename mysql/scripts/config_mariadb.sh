@@ -12,23 +12,30 @@ __mysql_config() {
 
 __start_mysql() {
   printf "Running the start_mysql function.\n"
-  ROOT_PASS="$(pwgen -s -1 12)"
-  USER="${USER-dbuser}"
-  PASS="${PASS-$(pwgen -s -1 12)}"
-  NAME="${NAME-db}"
-  printf "root password=%s\n" "$ROOT_PASS"
-  printf "NAME=%s\n" "$NAME"
-  printf "USER=%s\n" "$USER"
-  printf "PASS=%s\n" "$PASS"
-  mysqladmin -u root password "$ROOT_PASS"
-  mysql -uroot -p"$ROOT_PASS" <<-EOF
-	DELETE FROM mysql.user WHERE user = '$USER';
-	FLUSH PRIVILEGES;
-	CREATE USER '$USER'@'localhost' IDENTIFIED BY '$PASS';
-	GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION;
-	CREATE USER '$USER'@'%' IDENTIFIED BY '$PASS';
-	GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%' WITH GRANT OPTION;
-	CREATE DATABASE $NAME;
+
+#  ROOT_PASS="$(pwgen -s -1 12)"
+#  USER="${USER-dbuser}"
+#  PASS="${PASS-$(pwgen -s -1 12)}"
+#  NAME="${NAME-db}"
+#  printf "root password=%s\n" "$ROOT_PASS"
+#  printf "NAME=%s\n" "$NAME"
+#  printf "USER=%s\n" "$USER"
+#  printf "PASS=%s\n" "$PASS"
+#  mysqladmin -u root password "$ROOT_PASS"
+#  mysql -uroot -p"$ROOT_PASS" <<-EOF
+#	DELETE FROM mysql.user WHERE user = '$USER';
+#	FLUSH PRIVILEGES;
+#	CREATE USER '$USER'@'localhost' IDENTIFIED BY '$PASS';
+#	GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION;
+#	CREATE USER '$USER'@'%' IDENTIFIED BY '$PASS';
+#	GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%' WITH GRANT OPTION;
+#	CREATE DATABASE $NAME;
+#EOF
+  
+  # Will only use this for dev environments. root/root should be fine on local dev.
+  mysqladmin -u root password "root"
+  mysql -uroot -proot <<-EOF
+  GRANT ALL ON *.* TO root@'%' IDENTIFIED BY 'root' WITH GRANT OPTION; FLUSH PRIVILEGES
 EOF
 
   killall mysqld
