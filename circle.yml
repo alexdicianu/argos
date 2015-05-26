@@ -3,6 +3,7 @@ machine:
     - docker
 test:
   pre: 
-    - sudo pip install requests==2.5.3 && pip install docker-compose 
+    - sudo pip install requests==2.5.3 
+    - sudo pip install docker-compose 
   override:
     - docker-compose -up -d 
