@@ -6,4 +6,4 @@ test:
     - sudo pip install requests==2.5.3 
     - sudo pip install docker-compose 
   override:
-    - docker-compose -up -d 
+    - docker-compose up -d 
