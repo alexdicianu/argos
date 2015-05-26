@@ -8,3 +8,4 @@ test:
     - bundle install
   override:
     - docker-compose up -d 
+    - rspec tests/spec/
