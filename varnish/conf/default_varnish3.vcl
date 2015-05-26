@@ -12,17 +12,11 @@ acl purge {
 backend node1 {
      .host = "web1";
      .port = "55555";
-     .connect_timeout = 600s;
-     .first_byte_timeout = 600s;
-     .between_bytes_timeout = 600s;
  }
 
- backend node2 {
+backend node2 {
       .host = "web2";
       .port = "55555";
-      .connect_timeout = 600s;
-      .first_byte_timeout = 600s;
-      .between_bytes_timeout = 600s;
  }
 
 # Define the director that determines how to distribute incoming requests.

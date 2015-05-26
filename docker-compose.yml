@@ -1,3 +1,13 @@
+varnish:
+  build: varnish
+  ports:
+   - "80:80"
+  links:
+   - web1:web1
+   - web2:web2
+  environment:
+    VARNISH_PORT: 80
+
 web1:
   build: nginx
   ports:
@@ -29,14 +39,6 @@ web2:
     # For some reason, this doesn't get picked up by php-fpm and we need to specify it in php-fpm.conf (http://l33t.peopleperhour.com/2014/03/13/setting-environment-variables-in-php-fpm-when-using-docker-links/)
     REDIS_CACHE_HOST: __REDIS_HOST__
     REDIS_CACHE_PORT: 6379
-
-varnish:
-  build: varnish
-  ports:
-   - "80:80"
-  links:
-    - web1:web1
-    - web2:web2
 
 filesdata:
   build: filesdata
