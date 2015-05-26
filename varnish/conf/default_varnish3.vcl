@@ -5,15 +5,30 @@
 acl purge {
     "localhost";
     "127.0.0.1";
-    "VARNISH_BACKEND_IP";
 }
 
-backend default {
-    .host = "VARNISH_BACKEND_IP";
-    .port = "VARNISH_BACKEND_PORT";
-    .connect_timeout = 600s;
-    .first_byte_timeout = 600s;
-    .between_bytes_timeout = 600s;
+# Define the list of backends (web servers).
+
+backend node1 {
+     .host = "web1";
+     .port = "55555";
+     .connect_timeout = 600s;
+     .first_byte_timeout = 600s;
+     .between_bytes_timeout = 600s;
+ }
+
+ backend node2 {
+      .host = "web2";
+      .port = "55555";
+      .connect_timeout = 600s;
+      .first_byte_timeout = 600s;
+      .between_bytes_timeout = 600s;
+ }
+
+# Define the director that determines how to distribute incoming requests.
+director default_director round-robin {
+  { .backend = node1; }
+  { .backend = node2; }
 }
 
 sub vcl_deliver {
@@ -27,6 +42,9 @@ sub vcl_deliver {
 
 # Respond to incoming requests.
 sub vcl_recv {
+
+  # Set load balancing in place.
+  set req.backend = default_director;
 
   # Add a unique header containing the client address
   remove req.http.X-Forwarded-For;
