@@ -7,6 +7,7 @@ varnish:
    - web2:web2
   environment:
     VARNISH_PORT: 80
+    VARNISH_MULTINODE: "off"
 
 web1:
   build: nginx

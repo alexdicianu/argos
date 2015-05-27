@@ -12,17 +12,18 @@ acl purge {
 backend node1 {
      .host = "web1";
      .port = "55555";
- }
+}
 
 backend node2 {
-      .host = "web2";
-      .port = "55555";
- }
+     .host = "web2";
+     .port = "55555";
+}
 
-# Define the director that determines how to distribute incoming requests.
-director default_director round-robin {
-  { .backend = node1; }
-  { .backend = node2; }
+# Define the multinode director that determines how to distribute incoming requests.
+
+director multinode round-robin {
+    { .backend = node1; }
+    { .backend = node2; }
 }
 
 sub vcl_deliver {
@@ -38,7 +39,7 @@ sub vcl_deliver {
 sub vcl_recv {
 
   # Set load balancing in place.
-  set req.backend = default_director;
+  set req.backend = multinode;
 
   # Add a unique header containing the client address
   remove req.http.X-Forwarded-For;
