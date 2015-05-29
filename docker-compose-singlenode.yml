@@ -13,7 +13,7 @@ web1:
   ports:
    - "55555"
   volumes:
-   - /Users/dicix/work/pantheon/drupal7-test:/var/www/html/drupal7test
+   - /Users/myuser/work/pantheon/site:/var/www/html/site
   volumes_from:
    - filesdata
   environment:
