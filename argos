@@ -44,7 +44,6 @@ function add_site {
 			}
 		}7" > $tempfile
 		rm $file && mv $tempfile $file
-		break
 	done
 
 	############# 2. Add nginx/nginx/sites/SITENAME.conf ###############
@@ -308,7 +307,7 @@ then
 	echo "      [sitename]                 - the name you wish your site to have."
 	echo "      [path]                     - the path on your local machine (e.g. /Users/alex/work/pantheon/drupal8/)."
 	echo "      [cms]                      - drupal or wordpress (defaults to drupal)."
-	echo "    delete (alias del)           Deletes a site."
+	echo "    remove (alias rm)            Deletes a site."
 	echo "      [sitename]                 - the name of the site you wish to delete." 
 	echo "    site-list (alias sl, ps)     Lists all your available sites." 
 	echo "    build                        Build or rebuild services." 
@@ -327,7 +326,7 @@ fi
 case "$1" in
 	add) 
 		add_site $2 $3 $4 ;;
-	delete|del) 
+	remove|rm) 
 		delete_site $2 ;;
 	site-list|sl) 
 		list_sites ;;
