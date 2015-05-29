@@ -14,7 +14,7 @@ web1:
   ports:
    - "55555"
   volumes:
-   - /Users/myuser/work/pantheon/site:/var/www/html/site
+   - ./sites/default:/var/www/html/site
   volumes_from:
    - filesdata
   environment:
@@ -30,7 +30,7 @@ web2:
   ports:
    - "55555"
   volumes:
-   - /Users/myuser/work/pantheon/site:/var/www/html/site
+   - ./sites/default:/var/www/html/site
   volumes_from:
    - filesdata
   environment:

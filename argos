@@ -247,7 +247,7 @@ function list_sites {
 	local site
 	local site_name
 
-	for site in `grep -i '/var/www/html/' ./*.yml | cut -d- -f2`
+	for site in `grep -i '/var/www/html/' ./docker-compose.yml | cut -d- -f2`
 	do
 		site_name=`echo $site | cut -d: -f2 | awk -F/ {'print $5'}`
 		echo "$site_name ($site)"
