@@ -103,12 +103,12 @@ sub vcl_recv {
   }
 
   # Always have a has_js
-  # if (req.http.Cookie) {
-  #  set req.http.Cookie = "has_js=1; " + req.http.Cookie;
-  # }
-  # else {
-  #  set req.http.Cookie = "has_js=1";
-  # }
+  if (req.http.Cookie) {
+    set req.http.Cookie = "has_js=1; " + req.http.Cookie;
+  }
+  else {
+    set req.http.Cookie = "has_js=1";
+  }
 
   # Remove all cookies that Drupal doesn't need to know about. ANY remaining
   # cookie will cause the request to pass-through to Nginx. For the most part
