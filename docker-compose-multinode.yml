@@ -10,7 +10,7 @@ varnish:
     VARNISH_MULTINODE: "on"
 
 web1:
-  build: nginx
+  build: web
   ports:
    - "55555"
   volumes:
@@ -26,7 +26,7 @@ web1:
     REDIS_CACHE_PORT: 6379
 
 web2:
-  build: nginx
+  build: web
   ports:
    - "55555"
   volumes:

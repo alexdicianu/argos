@@ -256,15 +256,40 @@ function list_sites {
 
 # Runs the initial configuration on the docker-compose.yml file.
 function init {
-	local boot2docker_ip=`argos_host_ip`
+	local host_ip=`argos_host_ip`
+	local docker_compose_file
 
-	sed -i .txt "s/__REDIS_HOST__/$boot2docker_ip/" ./docker-compose.yml
-	rm ./docker-compose.yml.txt
-
-	sed -i .txt "s/__NGINX_HOST__/$boot2docker_ip/" ./docker-compose.yml
+	sed -i .txt "s/__REDIS_HOST__/$host_ip/" ./docker-compose.yml
 	rm ./docker-compose.yml.txt
 
 	echo "Initialization complete. You can now use your environment."
+}
+
+# Decides wether to use the single/multi node setup. Once this is chosen a new docker-compose.yml file is created and initialized.
+# This way we can just use the default docker-compose commands without worrying which compose file is the "active" one.
+function argos_up {
+
+	docker-compose stop
+
+	if [ "$1" == "multinode" ]; then
+		docker_compose_file="docker-compose-multinode.yml"
+	else
+		docker_compose_file="docker-compose-singlenode.yml"
+	fi
+
+	# Removing previous docker-compose files.
+	if [ -f ./docker-compose.yml ]; then
+	  rm ./docker-compose.yml
+	fi
+
+	# New compose file.
+	cp $docker_compose_file docker-compose.yml
+
+	# Initiate the file.
+	init
+
+	# Run it.
+	docker-compose up -d
 }
 
 ################################
@@ -291,6 +316,7 @@ then
 	echo "    restart                      Restart services." 
 	echo "    stop                         Stops services." 
 	echo "    up                           Create and start containers."
+	echo "      [singlenode|multinode]     - the configuration type (defaults to singlenode)."
 	echo "    ps                           List containers." 
 	echo "    help                         List all possible commands." 
 	echo "    ssh                          Gets SSH accees into the container with the [container_name] name." 
@@ -308,7 +334,7 @@ case "$1" in
 	init) 
 		init ;;
 	up) 
-		docker-compose up -d ;;
+		argos_up $2 ;;
 	start) 
 		docker-compose start ;;
 	restart) 

@@ -14,18 +14,6 @@ backend node1 {
      .port = "55555";
 }
 
-# backend node2 {
-#      .host = "web2";
-#      .port = "55555";
-# }
-
-# Define the multinode director that determines how to distribute incoming requests.
-
-# director multinode round-robin {
-#  { .backend = node1; }
-#  { .backend = node2; }
-# }
-
 sub vcl_deliver {
    if (obj.hits > 0) {
         set resp.http.X-Cache = "HIT";

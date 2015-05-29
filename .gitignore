@@ -1,2 +1,27 @@
-.DS_Store
+# OS generated files #
+######################
+.DS_Store*
+ehthumbs.db
+Icon
+
+Thumbs.db
+._*
+
+# Vim generated files #
+######################
+*.un~
+
+# SASS #
+##########
+.sass-cache
+
+# Logs and databases #
+######################
+*.log
+*.sql
 db_backups
+
+# The working docker-compose.yml file and all sites added in nginx. We just need the default ones #
+######################
+docker-compose.yml
+/web/nginx/sites/*.conf
