@@ -1,15 +1,10 @@
-nginx:
-  build: nginx
-  # Command "image" can be used if we wish to use the dicix/nginx docker repo. For local repo, we use build.
-  # image: dicix/nginx
+app:
+  build: app
   ports:
    - "55555:55555"
   # Volumes mounted this way use the virtualbox vboxsf filesystem. This is extremely slow for sites with 1000+ of files (just like drupal)
-  volumes:
-   - /Users/dicix/work/pantheon/drupal8:/var/www/html/drupal8
+  volumes: 
    - /Users/dicix/work/pantheon/drupal7:/var/www/html/drupal7
-   - /Users/dicix/work/pantheon/wordpress:/var/www/html/wordpress
-   - /Users/dicix/work/pantheon/drupaltest/:/var/www/html/drupaltest
   volumes_from:
    - filesdata
   environment:
