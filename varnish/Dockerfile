@@ -1,11 +1,10 @@
-FROM ubuntu:14.04
-MAINTAINER alex dicianu "alex.dicianu@gmail.com"
+FROM fedora:21
+MAINTAINER Pantheon Systems
+
+RUN yum -y update && yum clean all
 
 # Update the package repository and install applications
-RUN apt-get update -qq && \
-  apt-get upgrade -yqq && \
-  apt-get -yqq install vim curl wget varnish && \
-  apt-get -yqq clean
+RUN yum install -y --setopt=override_install_langs=en --setopt=tsflags=nodocs varnish redhat-rpm-config && rm -rf /var/cache/yum
 
 # Make our custom VCLs available on the container
 ADD conf/varnish /etc/default/varnish
