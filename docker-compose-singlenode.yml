@@ -1,0 +1,43 @@
+varnish:
+  build: varnish
+  ports:
+   - "80:80"
+  links:
+   - web1:web1
+  environment:
+    VARNISH_PORT: 80
+    VARNISH_MULTINODE: "off"
+
+web1:
+  build: web
+  ports:
+   - "55555"
+  volumes:
+   - ./sites/default:/var/www/html/site
+  volumes_from:
+   - filesdata
+  environment:
+    # Set environment variables for Redis, the same way pantheon does.
+    CACHE_HOST: __REDIS_HOST__
+    CACHE_PORT: 6379
+    # For some reason, this doesn't get picked up by php-fpm and we need to specify it in php-fpm.conf (http://l33t.peopleperhour.com/2014/03/13/setting-environment-variables-in-php-fpm-when-using-docker-links/)
+    REDIS_CACHE_HOST: __REDIS_HOST__
+    REDIS_CACHE_PORT: 6379
+
+filesdata:
+  build: filesdata
+
+mysqldata:
+  build: mysqldata
+
+mysql:
+  build: mysql
+  ports:
+   - "3306:3306"
+  volumes_from:
+   - mysqldata
+
+redis:
+  build: redis
+  ports:
+   - "6379:6379"

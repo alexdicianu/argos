@@ -9,7 +9,8 @@ RUN apt-get update -qq && \
 
 # Make our custom VCLs available on the container
 ADD conf/varnish /etc/default/varnish
-ADD conf/default_varnish3.vcl /etc/varnish/default_varnish3.vcl
+ADD conf/default_varnish3_multinode.vcl /etc/varnish/default_varnish3_multinode.vcl
+ADD conf/default_varnish3_singlenode.vcl /etc/varnish/default_varnish3_singlenode.vcl
 
 # Expose port 80
 EXPOSE 80

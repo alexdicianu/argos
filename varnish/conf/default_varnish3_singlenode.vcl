@@ -5,15 +5,13 @@
 acl purge {
     "localhost";
     "127.0.0.1";
-    "VARNISH_BACKEND_IP";
 }
 
-backend default {
-    .host = "VARNISH_BACKEND_IP";
-    .port = "VARNISH_BACKEND_PORT";
-    .connect_timeout = 600s;
-    .first_byte_timeout = 600s;
-    .between_bytes_timeout = 600s;
+# Define the list of backends (web servers).
+
+backend node1 {
+     .host = "web1";
+     .port = "55555";
 }
 
 sub vcl_deliver {
@@ -27,6 +25,9 @@ sub vcl_deliver {
 
 # Respond to incoming requests.
 sub vcl_recv {
+
+  # Set load balancing in place.
+  set req.backend = node1;
 
   # Add a unique header containing the client address
   remove req.http.X-Forwarded-For;
@@ -102,12 +103,12 @@ sub vcl_recv {
   }
 
   # Always have a has_js
-  # if (req.http.Cookie) {
-  #  set req.http.Cookie = "has_js=1; " + req.http.Cookie;
-  # }
-  # else {
-  #  set req.http.Cookie = "has_js=1";
-  # }
+  if (req.http.Cookie) {
+    set req.http.Cookie = "has_js=1; " + req.http.Cookie;
+  }
+  else {
+    set req.http.Cookie = "has_js=1";
+  }
 
   # Remove all cookies that Drupal doesn't need to know about. ANY remaining
   # cookie will cause the request to pass-through to Nginx. For the most part

@@ -23,7 +23,8 @@ function add_site {
 	local i
 	local tempfile
 
-	if [ $# -eq 0 ] || [ $# -gt 4 ]; then
+	if [ $# -eq 0 ] || [ $# -gt 4 ] || [ $# -lt 3 ]; then
+		echo "ERROR: Invalid number of parameters. Please see ./argos help"
 		exit;
 	else
 		local site=$1
@@ -44,17 +45,16 @@ function add_site {
 			}
 		}7" > $tempfile
 		rm $file && mv $tempfile $file
-		break
 	done
 
 	############# 2. Add nginx/nginx/sites/SITENAME.conf ###############
 
-	cp ./nginx/nginx/sites/default ./nginx/nginx/sites/$site.conf
-	sed -i .txt "s/__SITE_NAME__/$site/" ./nginx/nginx/sites/$site.conf
+	cp ./web/nginx/sites/default ./web/nginx/sites/$site.conf
+	sed -i .txt "s/__SITE_NAME__/$site/" ./web/nginx/sites/$site.conf
 
 	# Stupid OSX sed command won\'t work without giving an extension to the -i parameter.
 	# Need to manually remove the backup file it creates.
-	rm ./nginx/nginx/sites/$site.conf.txt
+	rm ./web/nginx/sites/$site.conf.txt
 
 	############# 3. Add VOLUME in filesdata/Dockerfile ###############
 
@@ -217,7 +217,7 @@ function delete_site {
 	rm ./docker-compose.yml.txt
 
 	############## 5. Remove nginx/nginx/sites/SITENAME.conf ##############
-	rm ./nginx/nginx/sites/$site.conf
+	rm ./web/nginx/sites/$site.conf
 	echo
 	echo "Removed nginx configuration file."
 
@@ -247,24 +247,61 @@ function list_sites {
 	local site
 	local site_name
 
-	for site in `grep -i '/var/www/html/' ./*.yml | cut -d- -f2`
+	#grep -i '/var/www/html/' ./docker-compose.yml | awk '{		print $0	}'
+
+	sites=`awk '
+		function ltrim(s) { sub(/^[ \t\r\n\-]+/, "", s); return s }
+		function rtrim(s) { sub(/[ \t\r\n]+$/, "", s); return s }
+		function trim(s)  { return rtrim(ltrim(s)); }
+
+		/\/var\/www\/html/ {
+			print trim($0)
+		}' ./docker-compose.yml | sort | uniq`
+
+	echo -e "Site name\tPath"
+	for site in $sites
 	do
 		site_name=`echo $site | cut -d: -f2 | awk -F/ {'print $5'}`
-		echo "$site_name ($site)"
+		echo "$site_name ..... ($site)"
 	done
 }
 
 # Runs the initial configuration on the docker-compose.yml file.
 function init {
-	local boot2docker_ip=`argos_host_ip`
+	local host_ip=`argos_host_ip`
+	local docker_compose_file
 
-	sed -i .txt "s/__REDIS_HOST__/$boot2docker_ip/" ./docker-compose.yml
-	rm ./docker-compose.yml.txt
-
-	sed -i .txt "s/__NGINX_HOST__/$boot2docker_ip/" ./docker-compose.yml
+	sed -i .txt "s/__REDIS_HOST__/$host_ip/" ./docker-compose.yml
 	rm ./docker-compose.yml.txt
 
 	echo "Initialization complete. You can now use your environment."
+}
+
+# Decides wether to use the single/multi node setup. Once this is chosen a new docker-compose.yml file is created and initialized.
+# This way we can just use the default docker-compose commands without worrying which compose file is the "active" one.
+function argos_up {
+
+	docker-compose stop
+
+	if [ "$1" == "multinode" ]; then
+		docker_compose_file="docker-compose-multinode.yml"
+	else
+		docker_compose_file="docker-compose-singlenode.yml"
+	fi
+
+	# Removing previous docker-compose files.
+	if [ -f ./docker-compose.yml ]; then
+	  rm ./docker-compose.yml
+	fi
+
+	# New compose file.
+	cp $docker_compose_file docker-compose.yml
+
+	# Initiate the file.
+	init
+
+	# Run it.
+	docker-compose up -d
 }
 
 ################################
@@ -283,7 +320,7 @@ then
 	echo "      [sitename]                 - the name you wish your site to have."
 	echo "      [path]                     - the path on your local machine (e.g. /Users/alex/work/pantheon/drupal8/)."
 	echo "      [cms]                      - drupal or wordpress (defaults to drupal)."
-	echo "    delete (alias del)           Deletes a site."
+	echo "    remove (alias rm)            Deletes a site."
 	echo "      [sitename]                 - the name of the site you wish to delete." 
 	echo "    site-list (alias sl, ps)     Lists all your available sites." 
 	echo "    build                        Build or rebuild services." 
@@ -291,6 +328,7 @@ then
 	echo "    restart                      Restart services." 
 	echo "    stop                         Stops services." 
 	echo "    up                           Create and start containers."
+	echo "      [singlenode|multinode]     - the configuration type (defaults to singlenode)."
 	echo "    ps                           List containers." 
 	echo "    help                         List all possible commands." 
 	echo "    ssh                          Gets SSH accees into the container with the [container_name] name." 
@@ -301,14 +339,14 @@ fi
 case "$1" in
 	add) 
 		add_site $2 $3 $4 ;;
-	delete|del) 
+	remove|rm) 
 		delete_site $2 ;;
 	site-list|sl) 
 		list_sites ;;
 	init) 
 		init ;;
 	up) 
-		docker-compose up -d ;;
+		argos_up $2 ;;
 	start) 
 		docker-compose start ;;
 	restart) 
