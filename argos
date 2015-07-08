@@ -23,7 +23,8 @@ function add_site {
 	local i
 	local tempfile
 
-	if [ $# -eq 0 ] || [ $# -gt 4 ]; then
+	if [ $# -eq 0 ] || [ $# -gt 4 ] || [ $# -lt 3 ]; then
+		echo "ERROR: Invalid number of parameters. Please see ./argos help"
 		exit;
 	else
 		local site=$1
@@ -246,10 +247,22 @@ function list_sites {
 	local site
 	local site_name
 
-	for site in `grep -i '/var/www/html/' ./docker-compose.yml | cut -d- -f2`
+	#grep -i '/var/www/html/' ./docker-compose.yml | awk '{		print $0	}'
+
+	sites=`awk '
+		function ltrim(s) { sub(/^[ \t\r\n\-]+/, "", s); return s }
+		function rtrim(s) { sub(/[ \t\r\n]+$/, "", s); return s }
+		function trim(s)  { return rtrim(ltrim(s)); }
+
+		/\/var\/www\/html/ {
+			print trim($0)
+		}' ./docker-compose.yml | sort | uniq`
+
+	echo -e "Site name\tPath"
+	for site in $sites
 	do
 		site_name=`echo $site | cut -d: -f2 | awk -F/ {'print $5'}`
-		echo "$site_name ($site)"
+		echo "$site_name ..... ($site)"
 	done
 }
 
