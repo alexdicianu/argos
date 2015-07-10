@@ -49,12 +49,12 @@ function add_site {
 
 	############# 2. Add nginx/nginx/sites/SITENAME.conf ###############
 
-	cp ./web/nginx/sites/default ./web/nginx/sites/$site.conf
-	sed -i .txt "s/__SITE_NAME__/$site/" ./web/nginx/sites/$site.conf
+	cp ./app/nginx/sites/default ./app/nginx/sites/$site.conf
+	sed -i .txt "s/__SITE_NAME__/$site/" ./app/nginx/sites/$site.conf
 
 	# Stupid OSX sed command won\'t work without giving an extension to the -i parameter.
 	# Need to manually remove the backup file it creates.
-	rm ./web/nginx/sites/$site.conf.txt
+	rm ./app/nginx/sites/$site.conf.txt
 
 	############# 3. Add VOLUME in filesdata/Dockerfile ###############
 
@@ -217,7 +217,7 @@ function delete_site {
 	rm ./docker-compose.yml.txt
 
 	############## 5. Remove nginx/nginx/sites/SITENAME.conf ##############
-	rm ./web/nginx/sites/$site.conf
+	rm ./app/nginx/sites/$site.conf
 	echo
 	echo "Removed nginx configuration file."
 

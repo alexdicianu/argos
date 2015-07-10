@@ -10,7 +10,7 @@ acl purge {
 # Define the list of backends (web servers).
 
 backend node1 {
-     .host = "web1";
+     .host = "app";
      .port = "55555";
 }
 
