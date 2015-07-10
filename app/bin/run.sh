@@ -1,8 +1,5 @@
 #!/bin/bash
 
-sed -i "s/REDIS_CACHE_HOST/$REDIS_CACHE_HOST/" /etc/php5/fpm/pool.d/www.conf
-sed -i "s/REDIS_CACHE_PORT/$REDIS_CACHE_PORT/" /etc/php5/fpm/pool.d/www.conf
-
 # Check for Drupal/Wordpress media file permissions.
 
 # Drupal
@@ -21,4 +18,4 @@ do
 done
 
 /etc/init.d/php5-fpm start
-nginx
+/usr/sbin/nginx

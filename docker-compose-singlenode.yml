@@ -3,13 +3,13 @@ varnish:
   ports:
    - "80:80"
   links:
-   - web1:web1
+   - app:app
   environment:
     VARNISH_PORT: 80
     VARNISH_MULTINODE: "off"
 
-web1:
-  build: web
+app:
+  build: app
   ports:
    - "55555"
   volumes:

@@ -3,14 +3,14 @@ varnish:
   ports:
    - "80:80"
   links:
-   - web1:web1
-   - web2:web2
+   - app1:app1
+   - app2:app2
   environment:
     VARNISH_PORT: 80
     VARNISH_MULTINODE: "on"
 
-web1:
-  build: web
+app1:
+  build: app
   ports:
    - "55555"
   volumes:
@@ -25,8 +25,8 @@ web1:
     REDIS_CACHE_HOST: __REDIS_HOST__
     REDIS_CACHE_PORT: 6379
 
-web2:
-  build: web
+app2:
+  build: app
   ports:
    - "55555"
   volumes:

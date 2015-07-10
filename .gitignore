@@ -24,5 +24,6 @@ db_backups
 # The working docker-compose.yml file and all sites added in nginx. We just need the default ones #
 ######################
 docker-compose.yml
-/web/nginx/sites/*.conf
+/app/nginx/sites/*.conf
 /sites/*
+.project 
