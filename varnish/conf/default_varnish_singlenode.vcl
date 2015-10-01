@@ -1,6 +1,11 @@
+vcl 4.0;
+
 #
 # Customized VCL file for serving up a Drupal or Wordpress site.
 #
+
+import std;
+import directors;
 
 acl purge {
     "localhost";
@@ -10,21 +15,16 @@ acl purge {
 # Define the list of backends (web servers).
 
 backend node1 {
-     .host = "app1";
+     .host = "app";
      .port = "55555";
 }
 
-backend node2 {
-     .host = "app2";
-     .port = "55555";
+sub vcl_init {
+    new cluster1 = directors.round_robin();
+    cluster1.add_backend(node1);
+    #cluster1.add_backend(b2, 1.0);
 }
 
-# Define the multinode director that determines how to distribute incoming requests.
-
-director multinode round-robin {
-    { .backend = node1; }
-    { .backend = node2; }
-}
 
 sub vcl_deliver {
    if (obj.hits > 0) {
@@ -39,11 +39,15 @@ sub vcl_deliver {
 sub vcl_recv {
 
   # Set load balancing in place.
-  set req.backend = multinode;
+  set req.backend_hint = cluster1.backend();
 
   # Add a unique header containing the client address
-  remove req.http.X-Forwarded-For;
-  set    req.http.X-Forwarded-For = client.ip;
+  if (req.http.x-forwarded-for) {
+    set req.http.X-Forwarded-For =
+        req.http.X-Forwarded-For + ", " + client.ip;
+  } else {
+    set req.http.X-Forwarded-For = client.ip;
+  }
 
   #[Drupal] Do not cache these paths.
   if (req.url ~ "^/install\.php$" || 
@@ -64,15 +68,15 @@ sub vcl_recv {
   }
 
   # Allow PURGE from localhost and the box's ip.
-  if (req.request == "PURGE") {
-      if (!client.ip ~ purge) {
-          error 405 "Not allowed.";
-       }
-       return (lookup);
+  if (req.method == "PURGE") {
+    if (client.ip !~ purge) {
+      #return (synth(405, "Not allowed."));
+    }
+    return (purge);
   }
 
   # Don't check cache for POSTs and various other HTTP request types
-  if (req.request != "GET" && req.request != "HEAD") {
+  if (req.method != "GET" && req.method != "HEAD") {
     return(pass);
   }
 
@@ -93,7 +97,7 @@ sub vcl_recv {
   if (req.http.Accept-Encoding) {
     if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$" || req.url ~ "^/robots\.txt$") {
       # No point in compressing these
-      remove req.http.Accept-Encoding;
+      unset req.http.Accept-Encoding;
     }
     if (req.http.Accept-Encoding ~ "gzip") {
       # If the browser supports it, we'll use gzip.
@@ -115,12 +119,12 @@ sub vcl_recv {
   }
 
   # Always have a has_js
-  # if (req.http.Cookie) {
-  #  set req.http.Cookie = "has_js=1; " + req.http.Cookie;
-  # }
-  # else {
-  #  set req.http.Cookie = "has_js=1";
-  # }
+  if (req.http.Cookie) {
+    set req.http.Cookie = "has_js=1; " + req.http.Cookie;
+  }
+  else {
+    set req.http.Cookie = "has_js=1";
+  }
 
   # Remove all cookies that Drupal doesn't need to know about. ANY remaining
   # cookie will cause the request to pass-through to Nginx. For the most part
@@ -195,18 +199,12 @@ sub vcl_recv {
 
 # Cache hit: the object was found in cache.
 sub vcl_hit {
-    if (req.request == "PURGE") {
-	      purge;
-        error 200 "Purged.";
-    }
+
 }
 
 # Cache miss: request is about to be sent to the backend.
 sub vcl_miss {
-    if (req.request == "PURGE") {
-	purge;
-        error 404 "Not in cache.";
-    }
+
 }
 
 # Routine used to determine the cache key if storing/retrieving a cached page.
@@ -219,9 +217,9 @@ sub vcl_hash {
 }
 
 # Code determining what to do when serving items from the Apache servers.
-sub vcl_fetch {
+sub vcl_backend_response {
   # Don't allow static files to set cookies.
-  if (req.url ~ "(?i)\.(png|gif|jpeg|jpg|ico|swf|css|js|html|htm)(\?[a-z0-9]+)?$") {
+  if (bereq.url ~ "(?i)\.(png|gif|jpeg|jpg|ico|swf|css|js|html|htm)(\?[a-z0-9]+)?$") {
     # beresp == Back-end response from the web server.
     unset beresp.http.set-cookie;
   }
@@ -230,15 +228,19 @@ sub vcl_fetch {
   set beresp.grace = 120m;
 
   # Don't cache something with a zero-length.
-  if (req.url ~ "^/sites/default/files/" && beresp.status == 200
-      && req.http.Content-Length == "0") {
+  if (bereq.url ~ "^/sites/default/files/" && beresp.status == 200 && bereq.http.Content-Length == "0") {
     set beresp.http.Cache-Control = "no-cache, must-revalidate, post-check=0, pre-check=0";
-    return (hit_for_pass);
+    
+    # Varnish 4 hit_for_pass
+    set beresp.uncacheable = true;
+    set beresp.ttl = 3s;
+    return (deliver);
+    
   }
 
   # Caching for permanent redirects (301s).
   if (beresp.status == 301) {
-    if (beresp.http.Location == req.http.X-Proto + req.http.Host + req.url) {
+    if (beresp.http.Location == bereq.http.X-Proto + bereq.http.Host + bereq.url) {
       # Do not cache requests that 301 to themselves for very long.
       set beresp.http.Cache-Control = "public, max-age=3";
       set beresp.ttl = 3s;
@@ -266,7 +268,7 @@ sub vcl_fetch {
 }
 
 # In the event of an error, show friendlier messages.
-sub vcl_error {
+sub vcl_backend_error {
   # Redirect to some other URL in the case of a homepage failure.
   #if (req.url ~ "^/?$") {
   #  set obj.status = 302;
@@ -274,8 +276,8 @@ sub vcl_error {
   #}
 
   # Otherwise redirect to the homepage, which will likely be in the cache.
-  set obj.http.Content-Type = "text/html; charset=utf-8";
-  synthetic {"
+  set beresp.http.Content-Type = "text/html; charset=utf-8";
+  synthetic({"<!DOCTYPE HTML>
 <html>
 <head>
   <title>Page Unavailable</title>
@@ -291,10 +293,10 @@ sub vcl_error {
     <h1 class="title">Page Unavailable</h1>
     <p>The page you requested is temporarily unavailable.</p>
     <p>We're redirecting you to the <a href="/">homepage</a> in 5 seconds.</p>
-    <div class="error">(Error "} + obj.status + " " + obj.response + {")</div>
+    <div class="error">(Error "} + beresp.status + {")</div>
   </div>
 </body>
 </html>
-"};
+"});
   return (deliver);
 }
