@@ -3,19 +3,19 @@
 # Check for Drupal/Wordpress media file permissions.
 
 # Drupal
-#for site in /var/www/html/*/sites/default
-#do
-#	chown -R nginx:nginx $site/files/
-#	chmod -R 0755 files/
-#done
+for site in /var/www/html/*/sites/default
+do
+	chown -R apache:nginx $site/files/
+	chmod -R 0755 files/
+done
 
 # Wordpress
-#site=''
-#for site in /var/www/html/*/wp-content
-#do
-#	chown -R nginx:nginx $site/upload/
-#	chmod -R 0755 files/
-#done
+site=''
+for site in /var/www/html/*/wp-content
+do
+	chown -R apache:nginx $site/upload/
+	chmod -R 0755 files/
+done
 
 /usr/sbin/php-fpm
 /usr/sbin/nginx
