@@ -3,7 +3,7 @@ varnish:
   ports:
    - "80:80"
   links:
-   - app:app
+   - app
   environment:
     VARNISH_PORT: 80
     VARNISH_MULTINODE: "off"

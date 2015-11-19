@@ -19,7 +19,7 @@ backend node1 {
      .port = "55555";
 }
 
-backend node1 {
+backend node2 {
      .host = "app2";
      .port = "55555";
 }
